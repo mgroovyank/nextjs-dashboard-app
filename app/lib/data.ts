@@ -18,12 +18,12 @@ export async function fetchRevenue() {
     // Artificially delay a reponse for demo purposes.
     // Don't do this in real life :)
 
-    // console.log('Fetching revenue data...');
-    // await new Promise((resolve) => setTimeout(resolve, 3000));
+    console.log('Fetching revenue data...');
+    // await new Promise((resolve) => setTimeout(resolve, 6000));
 
     const data = await sql<Revenue>`SELECT * FROM revenue`;
 
-    // console.log('Data fetch complete after 3 seconds.');
+    console.log('Data fetch complete for revenue.');
 
     return data.rows;
   } catch (error) {
@@ -33,6 +33,7 @@ export async function fetchRevenue() {
 }
 
 export async function fetchLatestInvoices() {
+  console.log("Fetching latest invoices data...");
   try {
     const data = await sql<LatestInvoiceRaw>`
       SELECT invoices.amount, customers.name, customers.image_url, customers.email, invoices.id
@@ -45,6 +46,7 @@ export async function fetchLatestInvoices() {
       ...invoice,
       amount: formatCurrency(invoice.amount),
     }));
+    console.log("Latest invoices fetched");
     return latestInvoices;
   } catch (error) {
     console.error('Database Error:', error);
@@ -64,6 +66,8 @@ export async function fetchCardData() {
          SUM(CASE WHEN status = 'pending' THEN amount ELSE 0 END) AS "pending"
          FROM invoices`;
 
+    // initiate all promises at the same time.      
+    // what happens if one data request is slower than all the others
     const data = await Promise.all([
       invoiceCountPromise,
       customerCountPromise,
